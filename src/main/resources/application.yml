@@ -1,0 +1,37 @@
+server:
+  port: 8080
+
+
+spring:
+  application:
+    name: like-system
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.IntegerSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+    consumer:
+      group-id: "group1"
+      enable-auto-commit: false
+      key-deserializer: org.apache.kafka.common.serialization.IntegerDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+  shardingsphere:
+    datasource:
+      names: ds
+      ds:
+        type: com.zaxxer.hikari.HikariDataSource
+        driver-class-name: com.mysql.cj.jdbc.Driver
+        jdbc-url: jdbc:mysql://localhost:3306/likedb?useSSL=false&serverTimezone=UTC
+        username: root
+        password: 1234
+    sharding:
+      tables:
+        likes:
+          actual-data-nodes: ds.like_$->{0..4}
+          table-strategy:
+            inline:
+              sharding-column: user_id
+              algorithm-expression: like_$->{user_id % 5}
+        article_like:
+          actual-data-nodes: ds.article_like
+
